@@ -61,6 +61,7 @@ def get_opponents(matches, tla):
     return c
 
 def is_valid(match):
+    # TODO: also check match counts in here?
     return len(set(match)) == TEAMS_PER_MATCH
 
 def weight_teams(matches, teams):
