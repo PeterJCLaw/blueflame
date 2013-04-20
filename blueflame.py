@@ -70,7 +70,7 @@ def weight_teams(matches, teams):
     for tla in teams:
         recent = match_recently(matches, tla)
         count = match_count(matches, tla)
-        weight = (1.0 / recent) + count
+        weight = (4.0 / recent) + count
         weighted_candidates.append((tla, weight))
 
     sorted_candidates = sorted(weighted_candidates, key = lambda x: x[1])
