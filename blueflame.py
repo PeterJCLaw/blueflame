@@ -18,6 +18,16 @@ def reverse(a_list):
     copy.reverse()
     return copy
 
+def invert(dictionary):
+    new = collections.defaultdict(list)
+    for k, v in dictionary.iteritems():
+        new[v].append(k)
+    return new
+
+def keys_sorted_by_value(dictionary, reverse = False):
+    s = sorted(dictionary, key=lambda key: dictionary[key], reverse = reverse)
+    return s
+
 def match_recently(matches, tla):
     """
     Returns how recently a team has had a match.
@@ -67,11 +77,42 @@ def weight_teams(matches, teams):
 
     return sorted_candidates
 
+def get_available_teams(weighted_teams):
+    first_tla, first_weight = weighted_teams[0]
+    print 'Lowest weighted:', first_tla, first_weight
+    # TODO: investigate what happens when we adjust these limits
+    top = first_weight + 2
+    bottom  = first_weight - 2
+    available = [x[0] for x in weighted_teams if x[1] < top and x[1] > bottom]
+    if len(available) < TEAMS_PER_MATCH:
+        # Add on the next N as well if there aren't enough
+        more = weighted_teams[len(available):len(available)+TEAMS_PER_MATCH]
+        available += [x[0] for x in more]
+    print 'available:', available
+    return available
+
+def find_best_opponents(prev_matches, available_teams):
+    available = set(available_teams)
+    print available
+    not_faced = {}
+    for tla in available_teams:
+        opps_raw = get_opponents(prev_matches, tla)
+        all_faced = set(opps_raw.keys())
+        not_faced_count = len(available - all_faced)
+        not_faced[tla] = not_faced_count
+
+    #print not_faced
+    best = keys_sorted_by_value(not_faced)
+    print 'Best opponents:', best
+    return best[:4]
+
 def generate_match(prev_matches, teams):
-    sorted_cands = weight_teams(prev_matches, teams)
-    next_four = sorted_cands[:4]
-    proposed_match = [x[0] for x in next_four]
-    print proposed_match
+    weighted_teams = weight_teams(prev_matches, teams)
+    print 'Complete weightings:', weighted_teams
+    available = get_available_teams(weighted_teams)
+
+    proposed_match = find_best_opponents(prev_matches, available)
+    print 'Proposing:', proposed_match
     return proposed_match
 
 if __name__ == '__main__':
