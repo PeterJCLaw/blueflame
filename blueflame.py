@@ -2,7 +2,7 @@
 import sys
 import collections
 
-TEAMS = [x.strip() for x in open('../match-scheduler/data/2013/teams-2013')]
+TEAMS = [x.strip() for x in open('match-scheduler2/data/2013/teams-2013')]
 
 MATCH_COUNT = 102
 TEAMS_PER_MATCH = 4

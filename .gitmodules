@@ -1,0 +1,3 @@
+[submodule "match-scheduler2"]
+	path = match-scheduler2
+	url = git://srobo.org/comp/match-scheduler2.git
