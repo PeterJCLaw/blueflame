@@ -74,21 +74,25 @@ def generate_match(prev_matches, teams):
     print proposed_match
     return proposed_match
 
-matches = [['GMR', 'MAI', 'BGR', 'CLY']]
+if __name__ == '__main__':
 
-# We want to pick teams that haven't had a match recently,
-# And/or who haven't had very many matches
+    matches = [['GMR', 'MAI', 'BGR', 'CLY']]
 
-for i in range(MATCH_COUNT):
-    match = []
-    while not is_valid(match):
-        match = generate_match(matches, TEAMS)
-    matches.append(match)
+    # We want to pick teams that haven't had a match recently,
+    # And/or who haven't had very many matches
 
-opps = get_opponents(matches, 'GMR')
+    for i in range(MATCH_COUNT):
+        print '---------------------------'
+        print 'Working on', i
+        match = []
+        while not is_valid(match):
+            match = generate_match(matches, TEAMS)
+        matches.append(match)
 
-print 'Done'
+    opps = get_opponents(matches, 'GMR')
 
-with open('out', 'w') as f:
-    for match in matches:
-        print >> f, '|'.join(match)
+    print 'Done'
+
+    with open('out', 'w') as f:
+        for match in matches:
+            print >> f, '|'.join(match)
