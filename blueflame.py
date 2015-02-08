@@ -13,11 +13,6 @@ print 'Team Count:', len(TEAMS)
 print 'Teams Per Match:', TEAMS_PER_MATCH
 print 'Match limit:', MATCH_LIMIT
 
-def reverse(a_list):
-    copy = a_list[:]
-    copy.reverse()
-    return copy
-
 def invert(dictionary):
     new = collections.defaultdict(list)
     for k, v in dictionary.iteritems():
@@ -34,7 +29,7 @@ def match_recently(matches, tla):
     High numbers mean the last match was a long time ago
     """
     i = 1
-    for m in reverse(matches):
+    for m in reversed(matches):
         if tla in m:
             return i
         # TODO: more than just addition?
@@ -45,10 +40,7 @@ def match_count(matches, tla):
     """
     Returns the number of matches a team is in.
     """
-    i = 0
-    for m in reverse(matches):
-        if tla in m:
-            i += 1
+    i = sum(tla in m for m in matches)
     return i
 
 def get_opponents(matches, tla):
