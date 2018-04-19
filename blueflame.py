@@ -57,11 +57,23 @@ def is_valid(match):
     return len(set(match)) == TEAMS_PER_MATCH
 
 def weight_teams(matches, teams):
+    """
+    Return a list of teams sorted by whether they should have a match soon.
+
+    Teams most due a match are at the start of the list
+
+    Reasons a team _shouldn't_ have match soon are:
+     * they have had one recently
+     * they have already had lots of matches
+    """
     weighted_candidates = []
 
     for tla in teams:
+        # high 'recent' means the team is due a match
         recent = match_recently(matches, tla)
+        # low 'count' means the team is due a match
         count = match_count(matches, tla)
+        # low 'weight' means the team is due a match
         weight = (4.0 / recent) + count
         weighted_candidates.append((tla, weight))
 
