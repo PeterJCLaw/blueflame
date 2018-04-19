@@ -2,7 +2,8 @@
 import sys
 import collections
 
-TEAMS = [x.strip() for x in open('match-scheduler2/data/2013/teams-2013')]
+NUM_TEAMS = 9
+TEAMS = [str(x) for x in range(NUM_TEAMS)]
 
 MATCH_COUNT = 102
 TEAMS_PER_MATCH = 4
@@ -122,7 +123,7 @@ def generate_match(prev_matches, teams):
 
 if __name__ == '__main__':
 
-    matches = [['GMR', 'MAI', 'BGR', 'CLY']]
+    matches = [TEAMS[:4]]
 
     # We want to pick teams that haven't had a match recently,
     # And/or who haven't had very many matches
