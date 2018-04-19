@@ -30,8 +30,8 @@ def match_recently(matches, tla):
     High numbers mean the last match was a long time ago
     """
     i = 1
-    for m in reversed(matches):
-        if tla in m:
+    for match in reversed(matches):
+        if tla in match:
             return i
         # TODO: more than just addition?
         i += 1
