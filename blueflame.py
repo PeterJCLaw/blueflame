@@ -103,8 +103,7 @@ def get_available_teams(weighted_teams: List[TeamWeighting]) -> List[Team]:
     LOGGER.debug("Lowest weighted: %s %s", first_tla, first_weight)
     # TODO: investigate what happens when we adjust these limits
     top = first_weight + 2
-    bottom  = first_weight - 2
-    available = [x[0] for x in weighted_teams if x[1] < top and x[1] > bottom]
+    available = [x[0] for x in weighted_teams if x[1] < top]
     if len(available) < TEAMS_PER_MATCH:
         # Add on the next N as well if there aren't enough
         more = weighted_teams[len(available):len(available)+TEAMS_PER_MATCH]
