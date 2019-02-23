@@ -164,7 +164,12 @@ def main(num_matches, num_teams, teams_per_match):
 
     LOGGER.info("Max number of matches a team could have: %d", match_limit)
 
-    matches = [teams[:teams_per_match]]
+    # Bootstrap by selecting the first (N % teams_per_match) teams in order
+    bootstrap_teams = num_teams - (num_teams % teams_per_match)
+    matches = [
+        teams[offset:offset + teams_per_match]
+        for offset in range(0, bootstrap_teams, teams_per_match)
+    ]
 
     # We want to pick teams that haven't had a match recently,
     # And/or who haven't had very many matches
