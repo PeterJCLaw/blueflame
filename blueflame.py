@@ -130,16 +130,25 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
         all_faced = set(opps_raw.keys())
         hasnt_faced = available - all_faced
 
-        # If this team has enough unfaced opponents, just go with that,
-        # perferring teams who are more in need of a next match.
-        if len(hasnt_faced) > TEAMS_PER_MATCH:
-            return sorted(
-                hasnt_faced,
-                key=available_teams.index,
-            )[:TEAMS_PER_MATCH]
-
         # Capture the teams this one could face
         could_face_by_team[team_id] = hasnt_faced
+
+    # Try to compose matches out of teams who have not yet faced each other
+    for team_id in available_teams:
+        hasnt_faced = could_face_by_team[team_id]
+        if len(hasnt_faced) < TEAMS_PER_MATCH:
+            continue
+
+        match = set([team_id])
+        for opponent in sorted(hasnt_faced, key=available_teams.index):
+            opponent_has_faced = available - could_face_by_team[opponent]
+            if opponent_has_faced & match:
+                continue
+
+            match.add(opponent)
+            if len(match) == TEAMS_PER_MATCH:
+                LOGGER.debug("Match of completely new opponents: %s", match)
+                return list(match)
 
     # Select the teams which have so far faced the fewest number of others
     num_not_faced = {k: len(v) for k, v in could_face_by_team.items()}
