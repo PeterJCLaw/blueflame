@@ -4,7 +4,7 @@ import sys
 import logging
 import argparse
 import collections
-from typing import List, Mapping, MutableMapping, NamedTuple, NewType, Tuple, TypeVar
+from typing import Dict, List, Mapping, MutableMapping, NamedTuple, NewType, Set, Tuple, TypeVar
 
 K = TypeVar('K')
 V = TypeVar('V')
@@ -122,9 +122,9 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
     available = set(available_teams)
     LOGGER.debug(available)
 
-    # Build a mapping of teams to number of other avilable teams which that team
-    # has _not_ faced
-    not_faced = {}  # type: Mapping[Team, int]
+    # Build a mapping of teams to other avilable teams which that team
+    # has not yet faced.
+    could_face_by_team = {}  # type: Dict[Team, Set[Team]]
     for team_id in available_teams:
         opps_raw = get_faced_opponents(prev_matches, team_id)
         all_faced = set(opps_raw.keys())
@@ -138,11 +138,12 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
                 key=available_teams.index,
             )[:TEAMS_PER_MATCH]
 
-        # Otherwise capture how many teams this one could face
-        not_faced[team_id] = len(hasnt_faced)
+        # Capture the teams this one could face
+        could_face_by_team[team_id] = hasnt_faced
 
     # Select the teams which have so far faced the fewest number of others
-    best = keys_sorted_by_value(not_faced, reverse=True)
+    num_not_faced = {k: len(v) for k, v in could_face_by_team.items()}
+    best = keys_sorted_by_value(num_not_faced, reverse=True)
     LOGGER.debug("Best opponents: %s", best)
     return best[:TEAMS_PER_MATCH]
 
