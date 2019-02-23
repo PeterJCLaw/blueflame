@@ -149,4 +149,5 @@ if __name__ == '__main__':
 
     with open('out', 'w') as f:
         for match in matches:
-            print >> f, '|'.join(match)
+            f.write('|'.join(match))
+            f.write('\n')
