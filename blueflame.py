@@ -1,6 +1,10 @@
+#!/usr/bin/env python
 
 import sys
+import logging
 import collections
+
+LOGGER = logging.getLogger(__name__)
 
 NUM_TEAMS = 9
 TEAMS = [str(x) for x in range(NUM_TEAMS)]
@@ -9,10 +13,7 @@ MATCH_COUNT = 102
 TEAMS_PER_MATCH = 4
 # total appearances / teams => max appearances per team
 MATCH_LIMIT = int(round(1.0 * MATCH_COUNT * TEAMS_PER_MATCH / len(TEAMS)))
-print 'Match Count:', MATCH_LIMIT
-print 'Team Count:', len(TEAMS)
-print 'Teams Per Match:', TEAMS_PER_MATCH
-print 'Match limit:', MATCH_LIMIT
+
 
 def invert(dictionary):
     new = collections.defaultdict(list)
@@ -85,7 +86,7 @@ def weight_teams(matches, teams):
 
 def get_available_teams(weighted_teams):
     first_tla, first_weight = weighted_teams[0]
-    print 'Lowest weighted:', first_tla, first_weight
+    LOGGER.debug("Lowest weighted: %s %s", first_tla, first_weight)
     # TODO: investigate what happens when we adjust these limits
     top = first_weight + 2
     bottom  = first_weight - 2
@@ -94,12 +95,12 @@ def get_available_teams(weighted_teams):
         # Add on the next N as well if there aren't enough
         more = weighted_teams[len(available):len(available)+TEAMS_PER_MATCH]
         available += [x[0] for x in more]
-    print 'available:', available
+    LOGGER.debug("available: %s", available)
     return available
 
 def find_best_opponents(prev_matches, available_teams):
     available = set(available_teams)
-    print available
+    LOGGER.debug(available)
     not_faced = {}
     for tla in available_teams:
         opps_raw = get_opponents(prev_matches, tla)
@@ -109,19 +110,25 @@ def find_best_opponents(prev_matches, available_teams):
 
     #print not_faced
     best = keys_sorted_by_value(not_faced)
-    print 'Best opponents:', best
+    LOGGER.debug("Best opponents: %s", best)
     return best[:4]
 
 def generate_match(prev_matches, teams):
     weighted_teams = weight_teams(prev_matches, teams)
-    print 'Complete weightings:', weighted_teams
+    LOGGER.debug("Complete weightings: %s", weighted_teams)
     available = get_available_teams(weighted_teams)
 
     proposed_match = find_best_opponents(prev_matches, available)
-    print 'Proposing:', proposed_match
+    LOGGER.debug("Proposing: %s", proposed_match)
     return proposed_match
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(message)s')
+
+    LOGGER.info("Match Count: %d", MATCH_LIMIT)
+    LOGGER.info("Team Count: %d", len(TEAMS))
+    LOGGER.info("Teams Per Match: %d", TEAMS_PER_MATCH)
+    LOGGER.info("Match limit: %d", MATCH_LIMIT)
 
     matches = [TEAMS[:4]]
 
@@ -129,8 +136,8 @@ if __name__ == '__main__':
     # And/or who haven't had very many matches
 
     for i in range(MATCH_COUNT):
-        print '---------------------------'
-        print 'Working on', i
+        LOGGER.debug("---------------------------")
+        LOGGER.info("Working on %d", i)
         match = []
         while not is_valid(match):
             match = generate_match(matches, TEAMS)
@@ -138,7 +145,7 @@ if __name__ == '__main__':
 
     opps = get_opponents(matches, 'GMR')
 
-    print 'Done'
+    LOGGER.info("Done")
 
     with open('out', 'w') as f:
         for match in matches:
