@@ -128,8 +128,8 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
     for team_id in available_teams:
         opps_raw = get_faced_opponents(prev_matches, team_id)
         all_faced = set(opps_raw.keys())
-        not_faced_count = len(available - all_faced)
-        not_faced[team_id] = not_faced_count
+        hasnt_faced = available - all_faced
+        not_faced[team_id] = len(hasnt_faced)
 
     # Select the teams which have so far faced the fewest number of others
     best = keys_sorted_by_value(not_faced, reverse=True)
