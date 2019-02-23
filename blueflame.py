@@ -182,8 +182,6 @@ def main(num_matches, num_teams, teams_per_match):
             match = generate_match(matches, teams)
         matches.append(match)
 
-    opps = get_opponents(matches, 'GMR')
-
     LOGGER.debug("Done")
 
     return matches
