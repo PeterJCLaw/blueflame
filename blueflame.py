@@ -134,7 +134,7 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
     # Select the teams which have so far faced the fewest number of others
     best = keys_sorted_by_value(not_faced, reverse=True)
     LOGGER.debug("Best opponents: %s", best)
-    return best[:4]
+    return best[:TEAMS_PER_MATCH]
 
 def generate_match(prev_matches: List[Match], teams: List[Team]) -> Match:
     weighted_teams = weight_teams(prev_matches, teams)
