@@ -51,7 +51,10 @@ def match_count(matches: List[Match], team_id: Team) -> int:
     i = sum(team_id in m for m in matches)
     return i
 
-def get_opponents(matches: List[Match], team_id: Team) -> Mapping[Team, int]:
+def get_faced_opponents(matches: List[Match], team_id: Team) -> Mapping[Team, int]:
+    """
+    Determine the opponents (and how many times) which a given team has faced.
+    """
     c = collections.Counter()  # type: MutableMapping[Team, int]
     for match in matches:
         if team_id in match:
@@ -112,9 +115,11 @@ def get_available_teams(weighted_teams: List[TeamWeighting]) -> List[Team]:
 def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) -> Match:
     available = set(available_teams)
     LOGGER.debug(available)
-    not_faced = {}
+
+    # Build a mapping of teams to number of other teams which that team has _not_ faced
+    not_faced = {}  # type: Mapping[Team, int]
     for team_id in available_teams:
-        opps_raw = get_opponents(prev_matches, team_id)
+        opps_raw = get_faced_opponents(prev_matches, team_id)
         all_faced = set(opps_raw.keys())
         not_faced_count = len(available - all_faced)
         not_faced[team_id] = not_faced_count
