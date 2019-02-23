@@ -140,6 +140,12 @@ def parse_args():
         default=TEAMS_PER_MATCH,
     )
     parser.add_argument(
+        '-o',
+        '--output-file',
+        type=argparse.FileType(mode='w'),
+        default=sys.stdout,
+    )
+    parser.add_argument(
         '--log-level',
         type=logging.getLevelName,
         default='INFO',
@@ -180,7 +186,7 @@ def main(num_matches, num_teams, teams_per_match):
 if __name__ == '__main__':
     args = parse_args()
 
-    logging.basicConfig(level=args.log_level, stream=sys.stdout, format='%(message)s')
+    logging.basicConfig(level=args.log_level, stream=sys.stderr, format='%(message)s')
 
     matches = main(
         num_matches=args.num_matches,
@@ -188,7 +194,6 @@ if __name__ == '__main__':
         teams_per_match=args.teams_per_match,
     )
 
-    with open('out', 'w') as f:
-        for match in matches:
-            f.write('|'.join(match))
-            f.write('\n')
+    for match in matches:
+        args.output_file.write('|'.join(match))
+        args.output_file.write('\n')
