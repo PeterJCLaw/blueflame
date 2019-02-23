@@ -122,9 +122,7 @@ def generate_match(prev_matches, teams):
     LOGGER.debug("Proposing: %s", proposed_match)
     return proposed_match
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(message)s')
-
+def main():
     LOGGER.info("Match Count: %d", MATCH_LIMIT)
     LOGGER.info("Team Count: %d", len(TEAMS))
     LOGGER.info("Teams Per Match: %d", TEAMS_PER_MATCH)
@@ -146,6 +144,13 @@ if __name__ == '__main__':
     opps = get_opponents(matches, 'GMR')
 
     LOGGER.info("Done")
+
+    return matches
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(message)s')
+
+    matches = main()
 
     with open('out', 'w') as f:
         for match in matches:
