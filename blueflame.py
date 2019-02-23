@@ -219,7 +219,7 @@ def main(num_matches: int, num_teams: int, teams_per_match: int) -> List[Match]:
         match = []  # type: Match
         while not is_valid(match):
             match = generate_match(matches, teams)
-        matches.append(match)
+        matches.append(sorted(match))
 
     LOGGER.debug("Done")
 
