@@ -4,22 +4,34 @@ import sys
 import logging
 import argparse
 import collections
+from typing import List, Mapping, MutableMapping, NamedTuple, NewType, Tuple, TypeVar
+
+K = TypeVar('K')
+V = TypeVar('V')
+
+Team = NewType('Team', str)
+TeamWeighting = NamedTuple('TeamWeighting', (
+    ('team', Team),
+    ('weight', float),
+))
+
+Match = List[Team]
 
 LOGGER = logging.getLogger(__name__)
 
 TEAMS_PER_MATCH = 4
 
-def invert(dictionary):
-    new = collections.defaultdict(list)
+def invert(dictionary: Mapping[K, V]) -> Mapping[V, List[K]]:
+    new = collections.defaultdict(list)  # type: Mapping[V, List[K]]
     for k, v in dictionary.items():
         new[v].append(k)
     return new
 
-def keys_sorted_by_value(dictionary, reverse = False):
+def keys_sorted_by_value(dictionary: Mapping[K, V], reverse: bool = False) -> List[K]:
     s = sorted(dictionary, key=lambda key: dictionary[key], reverse = reverse)
     return s
 
-def match_recently(matches, team_id):
+def match_recently(matches: List[Match], team_id: Team) -> float:
     """
     Returns how recently a team has had a match.
     High numbers mean the last match was a long time ago
@@ -32,15 +44,15 @@ def match_recently(matches, team_id):
         i += 1
     return float('inf')
 
-def match_count(matches, team_id):
+def match_count(matches: List[Match], team_id: Team) -> int:
     """
     Returns the number of matches a team is in.
     """
     i = sum(team_id in m for m in matches)
     return i
 
-def get_opponents(matches, team_id):
-    c = collections.Counter()
+def get_opponents(matches: List[Match], team_id: Team) -> Mapping[Team, int]:
+    c = collections.Counter()  # type: MutableMapping[Team, int]
     for match in matches:
         if team_id in match:
             for other in match:
@@ -48,11 +60,11 @@ def get_opponents(matches, team_id):
     del c[team_id]
     return c
 
-def is_valid(match):
+def is_valid(match: Match) -> bool:
     # TODO: also check match counts in here?
     return len(set(match)) == TEAMS_PER_MATCH
 
-def weight_teams(matches, teams):
+def weight_teams(matches: List[Match], teams: List[Team]) -> List[TeamWeighting]:
     """
     Return a list of teams sorted by whether they should have a match soon.
 
@@ -71,14 +83,19 @@ def weight_teams(matches, teams):
         count = match_count(matches, team_id)
         # low 'weight' means the team is due a match
         weight = (4.0 / recent) + count
-        weighted_candidates.append((team_id, weight))
+        weighted_candidates.append(TeamWeighting(team_id, weight))
 
     sorted_candidates = sorted(weighted_candidates, key = lambda x: x[1])
     #print sorted_candidates
 
     return sorted_candidates
 
-def get_available_teams(weighted_teams):
+def get_available_teams(weighted_teams: List[TeamWeighting]) -> List[Team]:
+    """
+    Determine which teams are available for the next match.
+
+    Those who have competed too recently are not available.
+    """
     first_tla, first_weight = weighted_teams[0]
     LOGGER.debug("Lowest weighted: %s %s", first_tla, first_weight)
     # TODO: investigate what happens when we adjust these limits
@@ -92,7 +109,7 @@ def get_available_teams(weighted_teams):
     LOGGER.debug("available: %s", available)
     return available
 
-def find_best_opponents(prev_matches, available_teams):
+def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) -> Match:
     available = set(available_teams)
     LOGGER.debug(available)
     not_faced = {}
@@ -107,7 +124,7 @@ def find_best_opponents(prev_matches, available_teams):
     LOGGER.debug("Best opponents: %s", best)
     return best[:4]
 
-def generate_match(prev_matches, teams):
+def generate_match(prev_matches: List[Match], teams: List[Team]) -> Match:
     weighted_teams = weight_teams(prev_matches, teams)
     LOGGER.debug("Complete weightings: %s", weighted_teams)
     available = get_available_teams(weighted_teams)
@@ -153,14 +170,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def main(num_matches, num_teams, teams_per_match):
+def main(num_matches: int, num_teams: int, teams_per_match: int) -> List[Match]:
     global TEAMS_PER_MATCH
     TEAMS_PER_MATCH = teams_per_match
 
     # total appearances / teams => max appearances per team
     match_limit = int(round(1.0 * num_matches * TEAMS_PER_MATCH / num_teams))
 
-    teams = [str(x) for x in range(num_teams)]
+    teams = [Team(str(x)) for x in range(num_teams)]
 
     LOGGER.info("Max number of matches a team could have: %d", match_limit)
 
@@ -177,7 +194,7 @@ def main(num_matches, num_teams, teams_per_match):
     for i in range(num_matches):
         LOGGER.debug("---------------------------")
         LOGGER.debug("Working on %d", i)
-        match = []
+        match = []  # type: Match
         while not is_valid(match):
             match = generate_match(matches, teams)
         matches.append(match)
