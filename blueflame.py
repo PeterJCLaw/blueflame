@@ -124,7 +124,6 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
         not_faced_count = len(available - all_faced)
         not_faced[team_id] = not_faced_count
 
-    #print not_faced
     best = keys_sorted_by_value(not_faced)
     LOGGER.debug("Best opponents: %s", best)
     return best[:4]
