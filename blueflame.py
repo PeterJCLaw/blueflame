@@ -129,6 +129,12 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
         opps_raw = get_faced_opponents(prev_matches, team_id)
         all_faced = set(opps_raw.keys())
         hasnt_faced = available - all_faced
+
+        # If this team has enough unfaced opponents, just go with that.
+        if len(hasnt_faced) > TEAMS_PER_MATCH:
+            return list(hasnt_faced)[:TEAMS_PER_MATCH]
+
+        # Otherwise capture how many teams this one could face
         not_faced[team_id] = len(hasnt_faced)
 
     # Select the teams which have so far faced the fewest number of others
