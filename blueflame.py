@@ -101,8 +101,13 @@ def get_available_teams(weighted_teams: List[TeamWeighting]) -> List[Team]:
     """
     first_tla, first_weight = weighted_teams[0]
     LOGGER.debug("Lowest weighted: %s %s", first_tla, first_weight)
-    # TODO: investigate what happens when we adjust these limits
-    top = first_weight + 2
+    # 0.75 is a fudge factor which determins how far down the weightings we look
+    # for teams who are available. This ends up controling the relationship
+    # between how many different opponents a team faces and how often they have
+    # matches. The relationship between this and the 4.0 fudge factor in
+    # `weight_teams` aren't entirely well understood, so you might need to
+    # modify one or both to get things to work for your scheduling requirements.
+    top = first_weight + 0.75
     available = [x[0] for x in weighted_teams if x[1] < top]
     if len(available) < TEAMS_PER_MATCH:
         # Add on the next N as well if there aren't enough
