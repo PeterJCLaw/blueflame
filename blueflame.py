@@ -11,7 +11,7 @@ TEAMS_PER_MATCH = 4
 
 def invert(dictionary):
     new = collections.defaultdict(list)
-    for k, v in dictionary.iteritems():
+    for k, v in dictionary.items():
         new[v].append(k)
     return new
 
