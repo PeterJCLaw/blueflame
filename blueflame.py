@@ -223,7 +223,7 @@ def main(num_matches: int, num_teams: int, teams_per_match: int) -> List[Match]:
     # We want to pick teams that haven't had a match recently,
     # And/or who haven't had very many matches
 
-    for i in range(num_matches):
+    for i in range(len(matches), num_matches):
         LOGGER.debug("---------------------------")
         LOGGER.debug("Working on %d", i)
         match = []  # type: Match
