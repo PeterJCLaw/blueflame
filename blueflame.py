@@ -122,7 +122,8 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
     available = set(available_teams)
     LOGGER.debug(available)
 
-    # Build a mapping of teams to number of other teams which that team has _not_ faced
+    # Build a mapping of teams to number of other avilable teams which that team
+    # has _not_ faced
     not_faced = {}  # type: Mapping[Team, int]
     for team_id in available_teams:
         opps_raw = get_faced_opponents(prev_matches, team_id)
