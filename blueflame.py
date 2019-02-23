@@ -2,18 +2,12 @@
 
 import sys
 import logging
+import argparse
 import collections
 
 LOGGER = logging.getLogger(__name__)
 
-NUM_TEAMS = 9
-TEAMS = [str(x) for x in range(NUM_TEAMS)]
-
-MATCH_COUNT = 102
 TEAMS_PER_MATCH = 4
-# total appearances / teams => max appearances per team
-MATCH_LIMIT = int(round(1.0 * MATCH_COUNT * TEAMS_PER_MATCH / len(TEAMS)))
-
 
 def invert(dictionary):
     new = collections.defaultdict(list)
@@ -122,35 +116,77 @@ def generate_match(prev_matches, teams):
     LOGGER.debug("Proposing: %s", proposed_match)
     return proposed_match
 
-def main():
-    LOGGER.info("Match Count: %d", MATCH_LIMIT)
-    LOGGER.info("Team Count: %d", len(TEAMS))
-    LOGGER.info("Teams Per Match: %d", TEAMS_PER_MATCH)
-    LOGGER.info("Match limit: %d", MATCH_LIMIT)
 
-    matches = [TEAMS[:4]]
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-m',
+        '--num-matches',
+        help="The overall number of matches",
+        type=int,
+        required=True,
+    )
+    parser.add_argument(
+        '-t',
+        '--num-teams',
+        help="The overall number of teams",
+        type=int,
+        required=True,
+    )
+    parser.add_argument(
+        '--teams-per-match',
+        help="The number of teams per match (default: %(default)d)",
+        type=int,
+        default=TEAMS_PER_MATCH,
+    )
+    parser.add_argument(
+        '--log-level',
+        type=logging.getLevelName,
+        default='INFO',
+    )
+    return parser.parse_args()
+
+
+def main(num_matches, num_teams, teams_per_match):
+    global TEAMS_PER_MATCH
+    TEAMS_PER_MATCH = teams_per_match
+
+    # total appearances / teams => max appearances per team
+    match_limit = int(round(1.0 * num_matches * TEAMS_PER_MATCH / num_teams))
+
+    teams = [str(x) for x in range(num_teams)]
+
+    LOGGER.info("Max number of matches a team could have: %d", match_limit)
+
+    matches = [teams[:4]]
 
     # We want to pick teams that haven't had a match recently,
     # And/or who haven't had very many matches
 
-    for i in range(MATCH_COUNT):
+    for i in range(num_matches):
         LOGGER.debug("---------------------------")
-        LOGGER.info("Working on %d", i)
+        LOGGER.debug("Working on %d", i)
         match = []
         while not is_valid(match):
-            match = generate_match(matches, TEAMS)
+            match = generate_match(matches, teams)
         matches.append(match)
 
     opps = get_opponents(matches, 'GMR')
 
-    LOGGER.info("Done")
+    LOGGER.debug("Done")
 
     return matches
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(message)s')
+    args = parse_args()
 
-    matches = main()
+    logging.basicConfig(level=args.log_level, stream=sys.stdout, format='%(message)s')
+
+    matches = main(
+        num_matches=args.num_matches,
+        num_teams=args.num_teams,
+        teams_per_match=args.teams_per_match,
+    )
 
     with open('out', 'w') as f:
         for match in matches:
