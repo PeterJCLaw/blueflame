@@ -19,33 +19,33 @@ def keys_sorted_by_value(dictionary, reverse = False):
     s = sorted(dictionary, key=lambda key: dictionary[key], reverse = reverse)
     return s
 
-def match_recently(matches, tla):
+def match_recently(matches, team_id):
     """
     Returns how recently a team has had a match.
     High numbers mean the last match was a long time ago
     """
     i = 1
     for match in reversed(matches):
-        if tla in match:
+        if team_id in match:
             return i
         # TODO: more than just addition?
         i += 1
     return float('inf')
 
-def match_count(matches, tla):
+def match_count(matches, team_id):
     """
     Returns the number of matches a team is in.
     """
-    i = sum(tla in m for m in matches)
+    i = sum(team_id in m for m in matches)
     return i
 
-def get_opponents(matches, tla):
+def get_opponents(matches, team_id):
     c = collections.Counter()
     for match in matches:
-        if tla in match:
+        if team_id in match:
             for other in match:
                 c[other] += 1
-    del c[tla]
+    del c[team_id]
     return c
 
 def is_valid(match):
@@ -64,14 +64,14 @@ def weight_teams(matches, teams):
     """
     weighted_candidates = []
 
-    for tla in teams:
+    for team_id in teams:
         # high 'recent' means the team is due a match
-        recent = match_recently(matches, tla)
+        recent = match_recently(matches, team_id)
         # low 'count' means the team is due a match
-        count = match_count(matches, tla)
+        count = match_count(matches, team_id)
         # low 'weight' means the team is due a match
         weight = (4.0 / recent) + count
-        weighted_candidates.append((tla, weight))
+        weighted_candidates.append((team_id, weight))
 
     sorted_candidates = sorted(weighted_candidates, key = lambda x: x[1])
     #print sorted_candidates
@@ -96,11 +96,11 @@ def find_best_opponents(prev_matches, available_teams):
     available = set(available_teams)
     LOGGER.debug(available)
     not_faced = {}
-    for tla in available_teams:
-        opps_raw = get_opponents(prev_matches, tla)
+    for team_id in available_teams:
+        opps_raw = get_opponents(prev_matches, team_id)
         all_faced = set(opps_raw.keys())
         not_faced_count = len(available - all_faced)
-        not_faced[tla] = not_faced_count
+        not_faced[team_id] = not_faced_count
 
     #print not_faced
     best = keys_sorted_by_value(not_faced)
