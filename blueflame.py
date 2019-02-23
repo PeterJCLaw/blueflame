@@ -85,7 +85,7 @@ def weight_teams(matches: List[Match], teams: List[Team]) -> List[TeamWeighting]
         # low 'count' means the team is due a match
         count = match_count(matches, team_id)
         # low 'weight' means the team is due a match
-        weight = (4.0 / recent) + count
+        weight = (4.0 / recent) + (count / 1.5)
         weighted_candidates.append(TeamWeighting(team_id, weight))
 
     sorted_candidates = sorted(weighted_candidates, key = lambda x: x[1])
