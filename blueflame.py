@@ -130,9 +130,13 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
         all_faced = set(opps_raw.keys())
         hasnt_faced = available - all_faced
 
-        # If this team has enough unfaced opponents, just go with that.
+        # If this team has enough unfaced opponents, just go with that,
+        # perferring teams who are more in need of a next match.
         if len(hasnt_faced) > TEAMS_PER_MATCH:
-            return list(hasnt_faced)[:TEAMS_PER_MATCH]
+            return sorted(
+                hasnt_faced,
+                key=available_teams.index,
+            )[:TEAMS_PER_MATCH]
 
         # Otherwise capture how many teams this one could face
         not_faced[team_id] = len(hasnt_faced)
