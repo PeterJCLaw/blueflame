@@ -196,7 +196,7 @@ def parse_args():
     )
     parser.add_argument(
         '--log-level',
-        type=logging.getLevelName,
+        choices=logging._nameToLevel.keys(),
         default='INFO',
     )
     return parser.parse_args()
