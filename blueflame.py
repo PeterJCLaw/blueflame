@@ -3,6 +3,7 @@
 import sys
 import logging
 import argparse
+import itertools
 import collections
 from typing import Dict, List, Mapping, MutableMapping, NamedTuple, NewType, Set, Tuple, TypeVar
 
@@ -51,17 +52,12 @@ def match_count(matches: List[Match], team_id: Team) -> int:
     i = sum(team_id in m for m in matches)
     return i
 
-def get_faced_opponents(matches: List[Match], team_id: Team) -> Mapping[Team, int]:
-    """
-    Determine the opponents (and how many times) which a given team has faced.
-    """
-    c = collections.Counter()  # type: MutableMapping[Team, int]
+def summarise_faced_nested(matches: List[Match]) -> Mapping[Team, Mapping[Team, int]]:
+    summary = collections.defaultdict(collections.Counter)
     for match in matches:
-        if team_id in match:
-            for other in match:
-                c[other] += 1
-    del c[team_id]
-    return c
+        for team_1, team_2 in itertools.permutations(match, 2):
+            summary[team_1][team_2] += 1
+    return summary
 
 def is_valid(match: Match) -> bool:
     # TODO: also check match counts in here?
@@ -122,11 +118,13 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
     available = set(available_teams)
     LOGGER.debug(available)
 
+    faced_mapping = summarise_faced_nested(prev_matches)
+
     # Build a mapping of teams to other avilable teams which that team
     # has not yet faced.
     could_face_by_team = {}  # type: Dict[Team, Set[Team]]
     for team_id in available_teams:
-        opps_raw = get_faced_opponents(prev_matches, team_id)
+        opps_raw = faced_mapping[team_id]
         all_faced = set(opps_raw.keys())
         hasnt_faced = available - all_faced
 
