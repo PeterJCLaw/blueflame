@@ -11,10 +11,12 @@ K = TypeVar('K')
 V = TypeVar('V')
 
 Team = NewType('Team', str)
-TeamWeighting = NamedTuple('TeamWeighting', (
-    ('team', Team),
-    ('weight', float),
-))
+
+
+class TeamWeighting(NamedTuple):
+    team: Team
+    weight: float
+
 
 Match = List[Team]
 
