@@ -106,8 +106,9 @@ def get_available_teams(weighted_teams: List[TeamWeighting]) -> List[Team]:
     # `weight_teams` aren't entirely well understood, so you might need to
     # modify one or both to get things to work for your scheduling requirements.
     # At the time of writing, the numbers 4.0 and 0.75 worked well for a
-    # competition of 108 matches between 36 teams.
-    top = first_weight + 0.75
+    # competition of 108 matches between 36 teams; 4.0 and 2.25 worked ok for a
+    # competition of 78 matches between 26 teams.
+    top = first_weight + 2.25
     available = [x[0] for x in weighted_teams if x[1] < top]
     if len(available) < TEAMS_PER_MATCH:
         # Add on the next N as well if there aren't enough
