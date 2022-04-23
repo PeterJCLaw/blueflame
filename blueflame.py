@@ -167,6 +167,16 @@ def generate_match(prev_matches: List[Match], teams: List[Team]) -> Match:
     return proposed_match
 
 
+def bootstrap(num_teams: int, teams_per_match: int, teams: List[Team]) -> List[Match]:
+    # Bootstrap by selecting the first (N % teams_per_match) teams in order
+    bootstrap_teams = num_teams - (num_teams % teams_per_match)
+    matches = [
+        teams[offset:offset + teams_per_match]
+        for offset in range(0, bootstrap_teams, teams_per_match)
+    ]
+    return matches
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -190,6 +200,12 @@ def parse_args():
         default=TEAMS_PER_MATCH,
     )
     parser.add_argument(
+        '-i',
+        '--input-file',
+        type=argparse.FileType(mode='r'),
+        help="Add more matches to an existing schedule",
+    )
+    parser.add_argument(
         '-o',
         '--output-file',
         type=argparse.FileType(mode='w'),
@@ -203,23 +219,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def main(num_matches: int, num_teams: int, teams_per_match: int) -> List[Match]:
+def main(
+    num_matches: int,
+    num_teams: int,
+    teams_per_match: int,
+    matches: List[Match],
+    teams: List[Team],
+) -> List[Match]:
     global TEAMS_PER_MATCH
     TEAMS_PER_MATCH = teams_per_match
 
     # total appearances / teams => max appearances per team
     match_limit = int(round(1.0 * num_matches * TEAMS_PER_MATCH / num_teams))
 
-    teams = [Team(str(x)) for x in range(num_teams)]
-
     LOGGER.info("Max number of matches a team could have: %d", match_limit)
-
-    # Bootstrap by selecting the first (N % teams_per_match) teams in order
-    bootstrap_teams = num_teams - (num_teams % teams_per_match)
-    matches = [
-        teams[offset:offset + teams_per_match]
-        for offset in range(0, bootstrap_teams, teams_per_match)
-    ]
 
     # We want to pick teams that haven't had a match recently,
     # And/or who haven't had very many matches
@@ -241,10 +254,28 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=args.log_level, stream=sys.stderr, format='%(message)s')
 
+    if args.input_file:
+        initial_matches = [
+            line.strip().split('|')
+            for line in args.input_file.readlines()
+            if line.strip()
+        ]
+        teams = sorted(set(Team(x) for x in itertools.chain.from_iterable(initial_matches)))
+        assert len(teams) == args.num_teams
+    else:
+        teams = [Team(str(x)) for x in range(args.num_teams)]
+        initial_matches = bootstrap(
+            num_teams=args.num_teams,
+            teams_per_match=args.teams_per_match,
+            teams=teams,
+        )
+
     matches = main(
         num_matches=args.num_matches,
         num_teams=args.num_teams,
         teams_per_match=args.teams_per_match,
+        matches=initial_matches,
+        teams=teams,
     )
 
     for match in matches:
