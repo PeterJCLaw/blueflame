@@ -123,7 +123,7 @@ def find_best_opponents(prev_matches: List[Match], available_teams: List[Team]) 
 
     faced_mapping = summarise_faced_nested(prev_matches)
 
-    # Build a mapping of teams to other avilable teams which that team
+    # Build a mapping of teams to other available teams which that team
     # has not yet faced.
     could_face_by_team = {}  # type: Dict[Team, Set[Team]]
     for team_id in available_teams:
